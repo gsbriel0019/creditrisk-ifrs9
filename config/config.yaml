@@ -1,0 +1,76 @@
+project:
+  name: "CreditRisk-IFRS9"
+  version: "1.0.0"
+  description: "Enterprise Credit Risk Modeling, Scorecard Engineering & IFRS 9 ECL Engine"
+  author: "Gabriel Proaño"
+
+portfolio:
+  default_sample_size: 5000
+  random_seed: 42
+  reject_rate: 0.25
+
+scorecard:
+  target_score: 600
+  target_odds: 50.0
+  pdo: 20.0
+  min_information_value: 0.02
+  max_bins: 5
+
+models:
+  logistic:
+    penalty: "l2"
+    C: 1.0
+    solver: "lbfgs"
+    max_iter: 1000
+  lightgbm:
+    n_estimators: 150
+    learning_rate: 0.05
+    max_depth: 4
+    num_leaves: 15
+    random_state: 42
+  calibration:
+    method: "isotonic"  # options: "isotonic", "sigmoid"
+
+ifrs9_staging:
+  stage1:
+    description: "Performing loans with low credit risk; 12-month ECL"
+    max_dpd: 29
+    relative_pd_threshold: 2.0
+  stage2:
+    description: "Underperforming loans with Significant Increase in Credit Risk (SICR); Lifetime ECL"
+    min_dpd: 30
+    max_dpd: 89
+    relative_pd_threshold: 2.0
+  stage3:
+    description: "Credit-impaired loans / default; Lifetime ECL"
+    min_dpd: 90
+
+macroeconomic_scenarios:
+  baseline:
+    name: "Baseline"
+    weight: 0.50
+    gdp_growth: 2.1
+    unemployment_rate: 4.2
+    central_bank_rate: 4.5
+    vasicek_z: 0.0
+  adverse:
+    name: "Severe Downturn"
+    weight: 0.30
+    gdp_growth: -1.8
+    unemployment_rate: 7.5
+    central_bank_rate: 6.2
+    vasicek_z: -1.645
+  favorable:
+    name: "Macro Expansion"
+    weight: 0.20
+    gdp_growth: 3.9
+    unemployment_rate: 3.4
+    central_bank_rate: 3.75
+    vasicek_z: 1.282
+
+ecl:
+  effective_interest_rate: 0.065
+  unsecured_lgd: 0.65
+  secured_lgd: 0.35
+  ccf_credit_line: 0.75
+  projection_years: 5
